@@ -1,24 +1,40 @@
 def bellman_ford(graph, source):
     """
-    Bellman-Ford algorithm
-
+    Implements the Bellman-Ford algorithm to find shortest paths from a source vertex.
+    
+    Args:
+    graph (dict): A dictionary representing the graph where keys are vertices 
+                  and values are lists of (destination, weight) tuples
+    source (int/str): The source vertex from which to calculate shortest paths
+    
+    Returns:
+    tuple: (distances, predecessors) 
+           - distances: dictionary of shortest distances from source to each vertex
+           - predecessors: dictionary of predecessor vertices in the shortest path
     """
+    # Initialize distances and predecessors
+    vertices = list(graph.keys())
+    distances = {v: float('inf') for v in vertices}
+    predecessors = {v: None for v in vertices}
     
-    dist = {}
-    precedent = {}
+    # Distance to source is 0
+    distances[source] = 0
     
-    for v in graph :
-        dist[v] = float('inf')
-        precedent[v] = None 
-        
-    dist[source] = 0 
-    
-    for i in range(1, len(graph)):
+    # Relax edges |V| - 1 times
+    for _ in range(len(vertices) - 1):
         for u in graph:
-            for v in graph[u]:
-                poids = graph[u][v]
-                if dist[u] + poids < dist[v] :
-                    dist[v] = dist[u] + poids 
-                    precedent[v] = u 
-                    
-    return precedent 
+            for v, weight in graph[u]:
+                # If we can improve the distance to v through u
+                if distances[u] + weight < distances[v]:
+                    distances[v] = distances[u] + weight
+                    predecessors[v] = u
+    
+    # Check for negative-weight cycles
+    for u in graph:
+        for v, weight in graph[u]:
+            if distances[u] + weight < distances[v]:
+                raise ValueError("Graph contains a negative-weight cycle")
+    
+    return distances, predecessors
+
+
